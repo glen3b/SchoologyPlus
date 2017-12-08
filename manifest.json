@@ -11,7 +11,7 @@
         "16": "imgs/icon@16.png"
     },
     "permissions": [
-        "activeTab",
+        "*://lms.lausd.net/*",
         "storage"
     ],
     "content_scripts": [
@@ -19,8 +19,8 @@
             "matches": [
                 "https://lms.lausd.net/*"
             ],
-            "css": [
-                "css/all.css"
+            "js": [
+                "js/all_pre.js"
             ],
             "run_at": "document_start"
         },
@@ -60,7 +60,12 @@
             "run_at": "document_end"
         }
     ],
+    "background": {
+        "scripts": [
+            "js/settingsmessenger.js"
+        ]
+    },
     "options_ui": {
         "page": "settings/options.html"
     }
-}   
+}
