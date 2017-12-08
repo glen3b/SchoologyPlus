@@ -73,7 +73,7 @@ for (let course of courses) {
             // FIXME check icon license, the site says free icons but doesn't specify an obvious license
             // not embedded in our app though
             let editGradeImg = document.createElement("img");
-            editGradeImg.src = "http://www.iconninja.com/files/727/965/72/edit-draw-pencile-write-icon.svg";
+            editGradeImg.src = "https://www.iconninja.com/files/727/965/72/edit-draw-pencile-write-icon.svg";
             editGradeImg.width = 12;
             editGradeImg.classList.add("grade-edit-indicator");
             // we only keep one period anyway
@@ -162,7 +162,7 @@ function setGradeText(gradeElement, sum, max, row, doNotDisplay) {
 
 function generateScoreModifyWarning(genSize){
     let modAssignWarning = document.createElement("img");
-    modAssignWarning.src = browser.extension.getURL("imgs/exclamation-mark.svg");
+    modAssignWarning.src = "https://image.flaticon.com/icons/svg/179/179386.svg";
     modAssignWarning.width = genSize;
     modAssignWarning.title = "This grade has been modified from its true value.";
     modAssignWarning.classList.add("modified-score-percent-warning");
