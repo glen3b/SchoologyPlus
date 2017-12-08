@@ -60,3 +60,8 @@ col.comments-column {
     border-style: solid;
     border-color:#767676;
 }
+
+/* to compensate for the added edit icon */
+.injected-assignment-percent{
+    padding-right: 6px;
+}

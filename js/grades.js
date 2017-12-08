@@ -41,10 +41,7 @@ for (let course of courses) {
                 max += assignmentMax;
 
                 let newGrade = document.createElement("span");
-                newGrade.textContent += assignmentMax === 0 ? "EC" : `${Math.round(assignmentScore * 100 / assignmentMax)}%`;
-                newGrade.title = assignmentMax === 0 ? "Extra Credit" : `${assignmentScore * 100 / assignmentMax}%`;
-                newGrade.classList.add("max-grade");
-                newGrade.classList.add("injected-assignment-percent");
+                prepareScoredAssignmentGrade(newGrade, assignmentScore, assignmentMax);
 
                 // td-content-wrapper
                 maxGrade.parentElement.appendChild(document.createElement("br"));
@@ -116,6 +113,17 @@ for (let course of courses) {
     setGradeText(gradeText, classPoints, classTotal, periods[0], classTotal === 0);
     for (let i = 1; i < periods.length; i++) {
         periods[i].remove();
+    }
+}
+
+function prepareScoredAssignmentGrade(spanPercent, score, max) {
+    spanPercent.textContent = max === 0 ? "EC" : `${Math.round(score * 100 / max)}%`;
+    spanPercent.title = max === 0 ? "Extra Credit" : `${score * 100 / max}%`;
+    if (!spanPercent.classList.contains("max-grade")) {
+        spanPercent.classList.add("max-grade");
+    }
+    if (!spanPercent.classList.contains("injected-assignment-percent")) {
+        spanPercent.classList.add("injected-assignment-percent");
     }
 }
 
@@ -231,6 +239,8 @@ function createEditListener(gradeColContentWrap, catRow, perRow) {
                 score.contentEditable = false;
                 score.classList.remove("student-editable");
             }
+            // update the assignment percentage
+            prepareScoredAssignmentGrade(gradeColContentWrap.getElementsByClassName("injected-assignment-percent")[0], userScore, userMax);
 
             return true;
         };
