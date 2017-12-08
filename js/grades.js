@@ -241,6 +241,15 @@ function createEditListener(gradeColContentWrap, catRow, perRow) {
             }
             // update the assignment percentage
             prepareScoredAssignmentGrade(gradeColContentWrap.getElementsByClassName("injected-assignment-percent")[0], userScore, userMax);
+            if(!gradeColContentWrap.getElementsByClassName("modified-assignment-percent-warning")[0]){
+                let modAssignWarning = document.createElement("img");
+                modAssignWarning.src = browser.extension.getURL("imgs/exclamation-mark.svg");
+                modAssignWarning.width = 11;
+                modAssignWarning.title = "This grade has been modified from its true value.";
+                modAssignWarning.classList.add("modified-assignment-percent-warning");
+                gradeColContentWrap.getElementsByClassName("injected-assignment-percent")[0].style.paddingRight = "0";
+                gradeColContentWrap.appendChild(modAssignWarning);
+            }
 
             return true;
         };

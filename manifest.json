@@ -13,6 +13,9 @@
     "permissions": [
         "*://lms.lausd.net/*"
     ],
+    "web_accessible_resources": [
+        "imgs/exclamation-mark.svg"
+    ],
     "content_scripts": [
         {
             "matches": [
@@ -44,7 +47,7 @@
                 "js/grades.js"
             ],
             "run_at": "document_end"
-        },  
+        },
         {
             "matches": [
                 "https://lms.lausd.net/course/*/members",

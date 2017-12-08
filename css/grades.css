@@ -62,6 +62,11 @@ col.comments-column {
 }
 
 /* to compensate for the added edit icon */
-.injected-assignment-percent{
+.injected-assignment-percent {
     padding-right: 6px;
+}
+
+.modified-assignment-percent-warning {
+    vertical-align: center;
+    padding-left: 1px;
 }
