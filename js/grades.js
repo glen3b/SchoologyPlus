@@ -134,3 +134,7 @@ function setGradeText(gradeElement, sum, max, row, doNotDisplay) {
         //span.style.fontWeight = "bold";
     }
 }
+
+let debug = {hello: "world"};
+let blob = new Blob([JSON.stringify(debug, null, 2)], {type : 'application/json'});
+console.debug(URL.createObjectURL(blob));

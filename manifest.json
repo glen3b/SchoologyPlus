@@ -54,6 +54,19 @@
                 "js/grades.js"
             ],
             "run_at": "document_end"
+        },  
+        {
+            "matches": [
+                "https://lms.lausd.net/course/*/members",
+                "https://lms.lausd.net/group/*/members"
+            ],
+            "css": [
+                "css/memberlist.css"
+            ],
+            "js": [
+                "js/memberlist.js"
+            ],
+            "run_at": "document_end"
         }
     ]
 }
