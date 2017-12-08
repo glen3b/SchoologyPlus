@@ -11,7 +11,8 @@
         "16": "imgs/icon@16.png"
     },
     "permissions": [
-        "activeTab"
+        "activeTab",
+        "storage"
     ],
     "content_scripts": [
         {
@@ -44,7 +45,7 @@
                 "js/grades.js"
             ],
             "run_at": "document_end"
-        },  
+        },
         {
             "matches": [
                 "https://lms.lausd.net/course/*/members",
@@ -58,5 +59,8 @@
             ],
             "run_at": "document_end"
         }
-    ]
-}
+    ],
+    "options_ui": {
+        "page": "settings/options.html"
+    }
+}   
