@@ -62,8 +62,6 @@ function startNextIfCan(enrollmentViewWrapper) {
     return true;
 }
 
-var observer = null;
-
 function handleDownloadClick() {
     // init
     if (linkButton.classList.contains("active")) {
@@ -80,14 +78,14 @@ function handleDownloadClick() {
     // class right
     // observe class enrollments-wrapper
 
-    observer = new MutationObserver(function (mutations) {
+    let observer = new MutationObserver(function (mutations) {
         mutations.forEach(function (mutation) {
             for (let addedNode of mutation.addedNodes) {
                 if (addedNode.classList.contains("enrollment-view-wrapper")) {
                     // TODO error check
                     processEnrollmentTable(addedNode.getElementsByClassName("enrollment-user-list")[0].firstElementChild, studentList);
                     if (!startNextIfCan(addedNode)) {
-                        finishListProcess(studentList);
+                        finishListProcess(studentList, observer, linkButton);
                     }
                     break;
                 }
@@ -100,7 +98,7 @@ function handleDownloadClick() {
     // starts on current page (side effect of UI hook)
     // bug or feature?
     if (!startNextIfCan(enrollmentsWrapper.firstElementChild)) {
-        finishListProcess(studentList);
+        finishListProcess(studentList, observer, linkButton);
     }
 }
 
@@ -112,7 +110,7 @@ function serializeList(studentList) {
     return result;
 }
 
-function finishListProcess(studentList) {
+function finishListProcess(studentList, observer, linkButton) {
     let file_path = URL.createObjectURL(new Blob([serializeList(studentList)], {type : 'text/plain'}));
     let a = document.createElement('A');
     a.href = file_path;
