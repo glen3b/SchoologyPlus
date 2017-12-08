@@ -68,5 +68,18 @@ col.comments-column {
 
 .modified-score-percent-warning {
     vertical-align: middle;
-    padding-left: 1px;
+    padding: 0px 0px 2px 2px;
 }
+
+.item-row img.modified-score-percent-warning {
+    width: 11px;
+}
+
+.category-row img.modified-score-percent-warning {
+    width: 12px;
+}
+
+.category-row .grade-column-right img.modified-score-percent-warning {
+    padding-left: 0px;
+    padding-right: 2px;
+} 

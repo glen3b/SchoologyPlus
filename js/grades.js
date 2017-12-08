@@ -92,7 +92,7 @@ for (let course of courses) {
             if (!weightText) {
                 classPoints += sum;
                 classTotal += max;
-            } else if (weightText.textContent == "(100%)") {
+            } else if (weightText.textContent === "(100%)") {
                 classPoints = sum;
                 classTotal = max;
                 addMoreClassTotal = false;
@@ -160,10 +160,10 @@ function setGradeText(gradeElement, sum, max, row, doNotDisplay) {
     }
 }
 
-function generateScoreModifyWarning(genSize){
+function generateScoreModifyWarning() {
     let modAssignWarning = document.createElement("img");
     modAssignWarning.src = "https://image.flaticon.com/icons/svg/179/179386.svg";
-    modAssignWarning.width = genSize;
+    //modAssignWarning.width = genSize;
     modAssignWarning.title = "This grade has been modified from its true value.";
     modAssignWarning.classList.add("modified-score-percent-warning");
     return modAssignWarning;
@@ -250,13 +250,18 @@ function createEditListener(gradeColContentWrap, catRow, perRow) {
                 maxGrade.textContent = " / " + userMax;
                 score.contentEditable = false;
                 score.classList.remove("student-editable");
+
+                // if there's a letter grade, remove it - it might be inaccurate
+                if (score.parentElement && score.parentElement.parentElement && score.parentElement.parentElement.tagName.toUpperCase() === "SPAN" && score.parentElement.parentElement.classList.contains("awarded-grade") && /^[A-DF] /.test(score.parentElement.parentElement.textContent)) {
+                    // note use of childNodes, it's not its own element
+                    score.parentElement.parentElement.childNodes[0].remove();
+                }
             }
             // update the assignment percentage
             prepareScoredAssignmentGrade(gradeColContentWrap.getElementsByClassName("injected-assignment-percent")[0], userScore, userMax);
             if (!gradeColContentWrap.getElementsByClassName("modified-score-percent-warning")[0]) {
-                let modAssignWarning = generateScoreModifyWarning(11);
                 gradeColContentWrap.getElementsByClassName("injected-assignment-percent")[0].style.paddingRight = "0";
-                gradeColContentWrap.appendChild(modAssignWarning);
+                gradeColContentWrap.appendChild(generateScoreModifyWarning());
             }
             // now category
             // category always has a numeric score, unlike period
@@ -264,11 +269,41 @@ function createEditListener(gradeColContentWrap, catRow, perRow) {
             let awardedCategoryPoints = catRow.getElementsByClassName("rounded-grade")[0].parentNode;
             let catScoreElem = awardedCategoryPoints.getElementsByClassName("rounded-grade")[0];
             let catMaxElem = awardedCategoryPoints.getElementsByClassName("max-grade")[0];
-            catScoreElem.textContent = Number.parseFloat(catScoreElem.textContent) + deltaPoints;
-            catMaxElem.textContent = " / " + (Number.parseFloat(catMaxElem.textContent.substring(3)) + deltaMax);
+            let newCatScore = Number.parseFloat(catScoreElem.textContent) + deltaPoints;
+            let newCatMax = Number.parseFloat(catMaxElem.textContent.substring(3)) + deltaMax;
+            catScoreElem.textContent = newCatScore;
+            catMaxElem.textContent = " / " + newCatMax;
             if (!awardedCategoryPoints.getElementsByClassName("modified-score-percent-warning")[0]) {
                 awardedCategoryPoints.appendChild(generateScoreModifyWarning(12));
             }
+            // category percentage
+            // need to recalculate
+            // content wrapper in right grade col
+            let awardedCategoryPercentContainer = catRow.getElementsByClassName("grade-column-right")[0].firstElementChild;
+            let awardedCategoryPercent = awardedCategoryPercentContainer;
+            // clear existing percentage indicator
+            while (awardedCategoryPercent.firstChild) {
+                awardedCategoryPercent.firstChild.remove();
+            }
+            awardedCategoryPercent.appendChild(document.createElement("span"));
+            awardedCategoryPercent = awardedCategoryPercent.firstElementChild;
+            awardedCategoryPercent.classList.add("awarded-grade");
+            awardedCategoryPercent.appendChild(document.createElement("span"));
+            awardedCategoryPercent = awardedCategoryPercent.firstElementChild;
+            awardedCategoryPercent.classList.add("numeric-grade");
+            awardedCategoryPercent.classList.add("primary-grade");
+            awardedCategoryPercent.appendChild(document.createElement("span"));
+            awardedCategoryPercent = awardedCategoryPercent.firstElementChild;
+            awardedCategoryPercent.classList.add("rounded-grade");
+
+            let newCatPercent = (newCatScore / newCatMax) * 100; 
+            awardedCategoryPercent.title = newCatPercent + "%";
+            awardedCategoryPercent.textContent = (Math.round(newCatPercent * 100) / 100) + "%";
+
+            if (!awardedCategoryPercentContainer.getElementsByClassName("modified-score-percent-warning")[0]) {
+                awardedCategoryPercentContainer.prepend(generateScoreModifyWarning());
+            }
+
             // TODO: category letter grade, period points (if any), period letter grade (weighting :/)
             // TODO should probably abstract the period-level grade calculation away if possible
             // first pass will likely only touch unweighted predictive grades
