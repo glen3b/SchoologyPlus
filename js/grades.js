@@ -9,6 +9,7 @@ for (let course of courses) {
     let grades = table.firstElementChild;
     let categories = grades.getElementsByClassName("category-row");
     let rows = Array.from(grades.children);
+    let periods = course.getElementsByClassName("period-row");
 
     let classPoints = 0;
     let classTotal = 0;
@@ -43,6 +44,7 @@ for (let course of courses) {
                 newGrade.textContent += assignmentMax === 0 ? "EC" : `${Math.round(assignmentScore * 100 / assignmentMax)}%`;
                 newGrade.title = assignmentMax === 0 ? "Extra Credit" : `${assignmentScore * 100 / assignmentMax}%`;
                 newGrade.classList.add("max-grade");
+                newGrade.classList.add("injected-assignment-percent");
 
                 // td-content-wrapper
                 maxGrade.parentElement.appendChild(document.createElement("br"));
@@ -53,6 +55,7 @@ for (let course of courses) {
                 let newGrade = document.createElement("span");
                 newGrade.textContent += "N/A";
                 newGrade.classList.add("max-grade");
+                newGrade.classList.add("injected-assignment-percent");
 
                 // td-content-wrapper
                 noGrade.parentElement.appendChild(document.createElement("br"));
@@ -64,9 +67,21 @@ for (let course of courses) {
             }
             //assignment.style.padding = "7px 30px 5px";
             //assignment.style.textAlign = "center";
+
+            // add UI for grade virtual editing
+            let gradeWrapper = assignment.getElementsByClassName("grade-wrapper")[0];
+            // FIXME check icon license, the site says free icons but doesn't specify an obvious license
+            // not embedded in our app though
+            let editGradeImg = document.createElement("img");
+            editGradeImg.src = "http://www.iconninja.com/files/727/965/72/edit-draw-pencile-write-icon.svg";
+            editGradeImg.width = 12;
+            editGradeImg.classList.add("grade-edit-indicator");
+            // we only keep one period anyway
+            editGradeImg.addEventListener("click", createEditListener(gradeWrapper.parentElement, category, periods[0]));
+            gradeWrapper.appendChild(editGradeImg);
         }
 
-        if(assignments.length === 0) {
+        if (assignments.length === 0) {
             category.getElementsByClassName("grade-column")[0].classList.add("grade-column-center");
         }
 
@@ -97,7 +112,6 @@ for (let course of courses) {
     grade.textContent = courseGrade ? courseGrade.textContent : "—";
     title.appendChild(grade);
 
-    let periods = course.getElementsByClassName("period-row");
     gradeText = periods[0].getElementsByClassName("awarded-grade")[0];
     setGradeText(gradeText, classPoints, classTotal, periods[0], classTotal === 0);
     for (let i = 1; i < periods.length; i++) {
@@ -133,4 +147,118 @@ function setGradeText(gradeElement, sum, max, row, doNotDisplay) {
         //span.style.color = "#3aa406";
         //span.style.fontWeight = "bold";
     }
+}
+
+function createEditListener(gradeColContentWrap, catRow, perRow) {
+    return function () {
+        let noGrade = gradeColContentWrap.getElementsByClassName("no-grade")[0];
+        let score = gradeColContentWrap.getElementsByClassName("rounded-grade")[0] || gradeColContentWrap.getElementsByClassName("rubric-grade-value")[0];
+        // note that this will always return (for our injected percentage element)
+        let maxGrade = gradeColContentWrap.getElementsByClassName("max-grade")[0];
+        let editElem;
+        let initPts;
+        let initMax;
+        if (noGrade) {
+            editElem = noGrade;
+            initPts = 0;
+            initMax = 0;
+        }
+        if (score && maxGrade) {
+            editElem = score;
+            initPts = Number.parseFloat(score.textContent);
+            initMax = Number.parseFloat(maxGrade.textContent.substring(3));
+        }
+
+        if (!editElem || editElem.classList.contains("student-editable")) {
+            return;
+        }
+
+        editElem.classList.add("student-editable");
+        editElem.contentEditable = true;
+
+        // TODO blur v focusout
+        let submitFunc = function () {
+            let userScore;
+            let userMax;
+            if (noGrade) {
+                // regex capture and check
+                let regexResult = /^(-?\d+(\.\d+)?)\s*\/\s*(\d+(\.\d+)?)$/.exec(editElem.textContent);
+                if (!regexResult) {
+                    return false;
+                }
+                userScore = Number.parseFloat(regexResult[1]);
+                userMax = Number.parseFloat(regexResult[3]);
+                if (Number.isNaN(userScore) || Number.isNaN(userMax)) {
+                    return false;
+                }
+            } else if (score) {
+                // user entered number must be a numeric
+                userScore = Number.parseFloat(score.textContent);
+                userMax = initMax;
+                if (Number.isNaN(userScore)) {
+                    return false;
+                }
+            } else {
+                // ???
+                console.warn("unexpected case of field type in editing grade");
+                return false;
+            }
+
+            // we've established a known new score and max, with an init score and max to compare to
+            let deltaPoints = userScore - initPts;
+            let deltaMax = userMax - initMax;
+            // first, replace no grades
+            if (noGrade) {
+                maxGrade = document.createElement("span");
+                maxGrade.classList.add("max-grade");
+                maxGrade.textContent = " / " + userMax;
+                gradeColContentWrap.prepend(maxGrade);
+                let awardedGrade = document.createElement("span");
+                awardedGrade.classList.add("awarded-grade");
+                score = document.createElement("span");
+                score.classList.add("rounded-grade");
+                score.title = userScore;
+                score.textContent = userScore;
+                awardedGrade.appendChild(score);
+                gradeColContentWrap.prepend(score);
+                noGrade.remove();
+            } else {
+                // we already have our DOM elements
+                score.title = userScore;
+                score.textContent = userScore;
+                // will not have changed but still
+                maxGrade.textContent = " / " + userMax;
+                score.contentEditable = false;
+                score.classList.remove("student-editable");
+            }
+
+            return true;
+        };
+        let cleanupFunc = function () {
+            editElem.removeEventListener("blur", blurFunc);
+            editElem.removeEventListener("keydown", keyFunc);
+        };
+        let keyFunc = function (event) {
+            if (event.which == 13 || event.keyCode == 13) {
+                if (submitFunc()) {
+                    cleanupFunc();
+                } else {
+                    editElem.focus();
+                }
+                return false;
+            }
+            return true;
+        };
+        let blurFunc = function (event) {
+            if (submitFunc()) {
+                cleanupFunc();
+            } else {
+                editElem.focus();
+            }
+            return false;
+        }
+        editElem.addEventListener("blur", blurFunc);
+        editElem.addEventListener("keydown", keyFunc);
+        editElem.focus();
+    };
 }

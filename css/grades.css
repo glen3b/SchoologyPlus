@@ -49,3 +49,14 @@ col.points-column {
 col.comments-column {
     width: 30%;
 }
+
+.grade-edit-indicator {
+    vertical-align: top;
+}
+
+.grade-column .student-editable {
+    padding: 1px;
+    border-width: 1px;
+    border-style: solid;
+    border-color:#767676;
+}
