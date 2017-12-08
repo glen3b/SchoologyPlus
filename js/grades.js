@@ -37,8 +37,11 @@ for (let course of courses) {
             if (score) {
                 let assignmentScore = Number.parseFloat(score.textContent);
                 let assignmentMax = Number.parseFloat(maxGrade.textContent.substring(3));
-                sum += assignmentScore;
-                max += assignmentMax;
+
+                if (!assignment.classList.contains("dropped")) {
+                    sum += assignmentScore;
+                    max += assignmentMax;
+                }
 
                 let newGrade = document.createElement("span");
                 prepareScoredAssignmentGrade(newGrade, assignmentScore, assignmentMax);
@@ -241,7 +244,7 @@ function createEditListener(gradeColContentWrap, catRow, perRow) {
             }
             // update the assignment percentage
             prepareScoredAssignmentGrade(gradeColContentWrap.getElementsByClassName("injected-assignment-percent")[0], userScore, userMax);
-            if(!gradeColContentWrap.getElementsByClassName("modified-assignment-percent-warning")[0]){
+            if (!gradeColContentWrap.getElementsByClassName("modified-assignment-percent-warning")[0]) {
                 let modAssignWarning = document.createElement("img");
                 modAssignWarning.src = browser.extension.getURL("imgs/exclamation-mark.svg");
                 modAssignWarning.width = 11;
