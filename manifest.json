@@ -11,7 +11,7 @@
         "16": "imgs/icon@16.png"
     },
     "permissions": [
-        "activeTab"
+        "*://lms.lausd.net/*"
     ],
     "content_scripts": [
         {
