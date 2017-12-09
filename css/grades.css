@@ -88,6 +88,10 @@ col.comments-column {
     width: 12px;
 }
 
+.period-row img.modified-score-percent-warning {
+    width: 13px;
+}
+
 .relative-span-contain {
     position: relative;
 }

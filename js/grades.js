@@ -70,15 +70,16 @@ for (let course of courses) {
 
             // add UI for grade virtual editing
             let gradeWrapper = assignment.getElementsByClassName("grade-wrapper")[0];
-            // FIXME check icon license, the site says free icons but doesn't specify an obvious license
-            // not embedded in our app though
-            let editGradeImg = document.createElement("img");
-            editGradeImg.src = "https://www.iconninja.com/files/727/965/72/edit-draw-pencile-write-icon.svg";
-            editGradeImg.width = 12;
-            editGradeImg.classList.add("grade-edit-indicator");
-            // we only keep one period anyway
-            editGradeImg.addEventListener("click", createEditListener(gradeWrapper.parentElement, category, periods[0]));
-            gradeWrapper.appendChild(editGradeImg);
+            // FIXME correct behavior for editing dropped assignments
+            if (!assignment.classList.contains("dropped")) {
+                let editGradeImg = document.createElement("img");
+                editGradeImg.src = "https://www.iconninja.com/files/727/965/72/edit-draw-pencile-write-icon.svg";
+                editGradeImg.width = 12;
+                editGradeImg.classList.add("grade-edit-indicator");
+                // we only keep one period anyway
+                editGradeImg.addEventListener("click", createEditListener(gradeWrapper.parentElement, category, periods[0]));
+                gradeWrapper.appendChild(editGradeImg);
+            }
         }
 
         if (assignments.length === 0) {
@@ -198,6 +199,11 @@ function createEditListener(gradeColContentWrap, catRow, perRow) {
 
         // TODO blur v focusout
         let submitFunc = function () {
+            if (!editElem.classList.contains("student-editable")) {
+                // we've already processed this event, ignore and return for cleanup
+                return true;
+            }
+
             let userScore;
             let userMax;
             if (noGrade) {
@@ -274,7 +280,7 @@ function createEditListener(gradeColContentWrap, catRow, perRow) {
             catScoreElem.textContent = newCatScore;
             catMaxElem.textContent = " / " + newCatMax;
             if (!awardedCategoryPoints.getElementsByClassName("modified-score-percent-warning")[0]) {
-                awardedCategoryPoints.appendChild(generateScoreModifyWarning(12));
+                awardedCategoryPoints.appendChild(generateScoreModifyWarning());
             }
             // category percentage
             // need to recalculate
@@ -296,7 +302,7 @@ function createEditListener(gradeColContentWrap, catRow, perRow) {
             awardedCategoryPercent = awardedCategoryPercent.firstElementChild;
             awardedCategoryPercent.classList.add("rounded-grade");
 
-            let newCatPercent = (newCatScore / newCatMax) * 100; 
+            let newCatPercent = (newCatScore / newCatMax) * 100;
             awardedCategoryPercent.title = newCatPercent + "%";
             awardedCategoryPercent.textContent = (Math.round(newCatPercent * 100) / 100) + "%";
 
@@ -304,9 +310,48 @@ function createEditListener(gradeColContentWrap, catRow, perRow) {
                 awardedCategoryPercentContainer.prepend(generateScoreModifyWarning());
             }
 
-            // TODO: category letter grade, period points (if any), period letter grade (weighting :/)
-            // TODO should probably abstract the period-level grade calculation away if possible
-            // first pass will likely only touch unweighted predictive grades
+            let awardedPeriodPercentContainer = perRow.getElementsByClassName("grade-column-right")[0].firstElementChild;
+            let awardedPeriodPercent = awardedPeriodPercentContainer;
+            // clear existing percentage indicator
+            while (awardedPeriodPercent.firstChild) {
+                awardedPeriodPercent.firstChild.remove();
+            }
+            awardedPeriodPercent.appendChild(document.createElement("span"));
+            awardedPeriodPercent = awardedPeriodPercent.firstElementChild;
+            awardedPeriodPercent.classList.add("awarded-grade");
+            awardedPeriodPercent.appendChild(document.createElement("span"));
+            awardedPeriodPercent = awardedPeriodPercent.firstElementChild;
+            awardedPeriodPercent.classList.add("numeric-grade");
+            awardedPeriodPercent.classList.add("primary-grade");
+            awardedPeriodPercent.appendChild(document.createElement("span"));
+            awardedPeriodPercent = awardedPeriodPercent.firstElementChild;
+            awardedPeriodPercent.classList.add("rounded-grade");
+
+            // now period (semester)
+            // might have a numeric score (weighting => no numeric, meaning we can assume unweighted if present)
+            let awardedPeriodPoints = perRow.getElementsByClassName("grade-column-center")[0];
+            if (awardedPeriodPoints && awardedPeriodPoints.textContent.trim().length !== 0) {
+                // awarded grade in our constructed element contains both rounded and max
+                let perScoreElem = awardedPeriodPoints.getElementsByClassName("rounded-grade")[0];
+                let perMaxElem = awardedPeriodPoints.getElementsByClassName("max-grade")[0];
+                let newPerScore = Number.parseFloat(perScoreElem.textContent) + deltaPoints;
+                let newPerMax = Number.parseFloat(perMaxElem.textContent.substring(3)) + deltaMax;
+                perScoreElem.textContent = newPerScore;
+                perMaxElem.textContent = " / " + newPerMax;
+                if (!awardedPeriodPoints.getElementsByClassName("modified-score-percent-warning")[0]) {
+                    awardedPeriodPoints.appendChild(generateScoreModifyWarning());
+                }
+
+                // go ahead and calculate period percentage here since we know it's unweighted
+                let newPerPercent = (newPerScore / newPerMax) * 100;
+                awardedPeriodPercent.title = newPerPercent + "%";
+                awardedPeriodPercent.textContent = (Math.round(newPerPercent * 100) / 100) + "%";
+            }
+
+            if (!awardedPeriodPercentContainer.getElementsByClassName("modified-score-percent-warning")[0]) {
+                awardedPeriodPercentContainer.prepend(generateScoreModifyWarning());
+            }
+
 
             return true;
         };
