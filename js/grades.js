@@ -1,6 +1,80 @@
 console.debug("grades.js inject starting");
 let inner = document.getElementById("main-inner") || document.getElementById("content-wrapper");
 let courses = inner.getElementsByClassName("gradebook-course");
+
+// FIXME potential race condition if this finishes while the other JS is processing the list (and specifically needs to access parent)
+// double (not triple) equal check past - don't want to sort past
+if (document.getElementById("main-inner") && new URLSearchParams(location.search).get("past") != 1) {
+    // we're on a composite grades page, we can sort it
+    let xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function () {
+        if (!(xmlHttp.readyState == 4 && xmlHttp.status >= 200 && xmlHttp.status < 300)) {
+            return;
+        }
+        let apiResp = JSON.parse(xmlHttp.responseText);
+        let orderedClassList = apiResp.body.courses.sections.map(function (sec) { return sec.nid; });
+        let coursesArr = Array.from(courses);
+        coursesArr.sort(function (a, b) {
+            // get course IDs
+            // 22 = "s-js-gradebook-course-".length
+            let aId = Number.parseInt(a.id.substr(22));
+            let bId = Number.parseInt(b.id.substr(22));
+            let aInd = orderedClassList.indexOf(aId);
+            let bInd = orderedClassList.indexOf(bId);
+            if (aInd === -1) {
+                // all courses not present in sort list are greater than those that are
+                return bInd === -1 ? 0 : 1;
+            } else if (bInd === -1) {
+                // all courses not present in sort list are greater than those that are
+                return aInd === -1 ? 0 : -1;
+            }
+            return aInd === bInd ? 0 : (aInd < bInd ? -1 : 1);
+        });
+        for (let course of coursesArr) {
+            course.remove();
+        }
+        for (let course of coursesArr) {
+            inner.appendChild(course);
+        }
+    }
+
+    // default sort by period
+    // avoids latency if the user sort order corresponds with the period sort order
+    let coursesArr = Array.from(courses);
+    coursesArr.sort(function (a, b) {
+        // .gradebook-course .gradebook-course-title a 
+        let aTitle = a.firstElementChild.firstElementChild.textContent;
+        let bTitle = b.firstElementChild.firstElementChild.textContent;
+        let perExtractRegex = /TERM [A-Z]+ - PERIOD (\d+)/;
+        let aPer = Number.parseInt(perExtractRegex.exec(aTitle)[1]);
+        let bPer = Number.parseInt(perExtractRegex.exec(bTitle)[1]);
+
+        // classes with periods come first
+        if (!aPer) {
+            // if A does not have a period, it is greater than anything which does
+            return bPer ? 1 : 0;
+        } else if (!bPer) {
+            // if B does not have a period, it is greater than anything which does (a < b if A has period and B does not)
+            return aPer ? -1 : 0;
+        }
+
+        return aPer === bPer ? 0 : aPer < bPer ? -1 : 1;
+    });
+    // assumes courses are the last elements
+    for (let course of coursesArr) {
+        course.remove();
+    }
+    for (let course of coursesArr) {
+        inner.appendChild(course);
+    }
+
+    xmlHttp.open("GET", "https://lms.lausd.net/iapi/course/active", true); // true for asynchronous 
+    xmlHttp.send(null);
+}
+
+// not sure if needed, but requery courses after our inital sort to avoid any potential problems
+courses = inner.getElementsByClassName("gradebook-course");
+
 for (let course of courses) {
     let title = course.getElementsByClassName("gradebook-course-title")[0];
     let summary = course.getElementsByClassName("summary-course")[0];
