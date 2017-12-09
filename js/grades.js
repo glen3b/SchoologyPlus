@@ -260,7 +260,7 @@ function createEditListener(gradeColContentWrap, catRow, perRow) {
             // update the assignment percentage
             prepareScoredAssignmentGrade(gradeColContentWrap.getElementsByClassName("injected-assignment-percent")[0], userScore, userMax);
             if (!gradeColContentWrap.getElementsByClassName("modified-score-percent-warning")[0]) {
-                gradeColContentWrap.getElementsByClassName("injected-assignment-percent")[0].style.paddingRight = "0";
+                //gradeColContentWrap.getElementsByClassName("injected-assignment-percent")[0].style.paddingRight = "0";
                 gradeColContentWrap.appendChild(generateScoreModifyWarning());
             }
             // now category

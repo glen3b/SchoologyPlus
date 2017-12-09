@@ -52,6 +52,13 @@ col.comments-column {
 
 .grade-edit-indicator {
     vertical-align: top;
+    position: absolute;
+    bottom: 0px;
+}
+
+/* to allow "absolute" position of edit icon" */
+.item-row .grade-column .grade-wrapper{
+    position: relative;
 }
 
 .grade-column .student-editable {
@@ -62,13 +69,15 @@ col.comments-column {
 }
 
 /* to compensate for the added edit icon */
+/*
 .injected-assignment-percent {
     padding-right: 6px;
 }
+*/
 
 .modified-score-percent-warning {
     vertical-align: middle;
-    padding: 0px 0px 2px 2px;
+    position: absolute;
 }
 
 .item-row img.modified-score-percent-warning {
@@ -79,7 +88,16 @@ col.comments-column {
     width: 12px;
 }
 
-.category-row .grade-column-right img.modified-score-percent-warning {
-    padding-left: 0px;
+.relative-span-contain {
+    position: relative;
+}
+
+.grade-column-right .modified-score-percent-warning {
+    position: static;
     padding-right: 2px;
-} 
+    padding-bottom: 1px;
+}
+
+.grade-column-center .modified-score-percent-warning {
+    padding-top: 1px;
+}
