@@ -4,7 +4,7 @@ body #header, .s-enable-course-dashboard.is-home #nav ul #primary-home a, .s-ena
 
 #nav #nav_left li#primary-home:hover, .s-enable-course-dashboard.is-home #nav ul #primary-home a:hover, #nav #nav_left li.primary-activities:hover, #nav #nav_left li.primary-activities.active, .s-enable-course-dashboard.is-home #nav ul #primary-home:hover {
     background-color: #2a9e6e !important;
-    color: white;    
+    color: white;
 }
 
 body #nav #primary-home a:hover, body #nav #profile a:hover, body .primary-activities .clickable:hover, body .primary-activities .active, body #nav ul li.active-trail a, body .ac_results ul .ac_over .ac-top, body .schoology:hover, body .ac_over .schoology, body .action-links a:hover, body .action-links span:hover, body .edit-profile-picture-hover:hover, body .edit-profile-picture-hover.active, body #sidebar-left .action-links a:hover, .component-add-link:hover, body .search-toggle:hover, body #primary-settings .unfold:hover {
