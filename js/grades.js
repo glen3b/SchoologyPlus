@@ -195,7 +195,7 @@ for (let course of courses) {
 }
 
 function prepareScoredAssignmentGrade(spanPercent, score, max) {
-    spanPercent.textContent = max === 0 ? "EC" : `${Math.round(score * 100 / max)}%`;
+    spanPercent.textContent = max === 0 ? "EC" : `${Math.round(score * 100 * 10 / max) / 10}%`;
     spanPercent.title = max === 0 ? "Extra Credit" : `${score * 100 / max}%`;
     if (!spanPercent.classList.contains("max-grade")) {
         spanPercent.classList.add("max-grade");
