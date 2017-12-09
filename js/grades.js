@@ -435,11 +435,7 @@ function createEditListener(gradeColContentWrap, catRow, perRow) {
         };
         let keyFunc = function (event) {
             if (event.which == 13 || event.keyCode == 13) {
-                if (submitFunc()) {
-                    cleanupFunc();
-                } else {
-                    editElem.focus();
-                }
+                editElem.blur();
                 return false;
             }
             return true;
