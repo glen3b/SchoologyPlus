@@ -1,6 +1,7 @@
 console.debug("grades.js inject starting");
 let inner = document.getElementById("main-inner") || document.getElementById("content-wrapper");
 let courses = inner.getElementsByClassName("gradebook-course");
+let gradesModified = false;
 
 // FIXME potential race condition if this finishes while the other JS is processing the list (and specifically needs to access parent)
 // double (not triple) equal check past - don't want to sort past
@@ -194,6 +195,32 @@ for (let course of courses) {
     }
 }
 
+let timeRow = document.getElementById("past-selector") || document.querySelector(".content-top-upper").insertAdjacentElement('afterend', document.createElement("div"));
+
+let label = document.createElement("label");
+label.textContent = "Enable grade modification";
+label.htmlFor = "enable-modify";
+label.classList.add("modify-label");
+timeRow.appendChild(label);
+
+let checkBox = document.createElement("input");
+checkBox.type = "checkbox";
+checkBox.id = "enable-modify";
+checkBox.onclick = () => {
+    if (document.getElementById("enable-modify").checked) {
+        for (let edit of document.getElementsByClassName("grade-edit-indicator")) {
+            edit.style.display = "unset";
+        }
+    } else if (!gradesModified) {
+        for (let edit of document.getElementsByClassName("grade-edit-indicator")) {
+            edit.style.display = "none";
+        }
+    } else {
+        document.location.reload();
+    }
+};
+timeRow.appendChild(checkBox);
+
 function prepareScoredAssignmentGrade(spanPercent, score, max) {
     spanPercent.textContent = max === 0 ? "EC" : `${Math.round(score * 100 * 10 / max) / 10}%`;
     spanPercent.title = max === 0 ? "Extra Credit" : `${score * 100 / max}%`;
@@ -342,6 +369,7 @@ function createEditListener(gradeColContentWrap, catRow, perRow) {
             if (!gradeColContentWrap.getElementsByClassName("modified-score-percent-warning")[0]) {
                 //gradeColContentWrap.getElementsByClassName("injected-assignment-percent")[0].style.paddingRight = "0";
                 gradeColContentWrap.appendChild(generateScoreModifyWarning());
+                gradesModified = true;
             }
             // now category
             // category always has a numeric score, unlike period
@@ -420,6 +448,18 @@ function createEditListener(gradeColContentWrap, catRow, perRow) {
                 let newPerPercent = (newPerScore / newPerMax) * 100;
                 awardedPeriodPercent.title = newPerPercent + "%";
                 awardedPeriodPercent.textContent = (Math.round(newPerPercent * 100) / 100) + "%";
+            } else {
+                let total = 0;
+                for (let category of perRow.parentElement.getElementsByClassName("category-row")) {
+                    let weightPercent = category.getElementsByClassName("percentage-contrib")[0].textContent;
+                    let col = category.getElementsByClassName("grade-column-right")[0];
+                    if (col) {
+                        let scorePercent = Number.parseFloat(col.textContent.match(/(\d+\.?\d*)%/)[1]);
+                        total += (weightPercent.slice(1, -2) / 100) * scorePercent;
+                        awardedPeriodPercent.title = total + "%";
+                        awardedPeriodPercent.textContent = (Math.round(total * 100) / 100) + "%";
+                    }
+                }
             }
 
             if (!awardedPeriodPercentContainer.getElementsByClassName("modified-score-percent-warning")[0]) {
@@ -443,6 +483,14 @@ function createEditListener(gradeColContentWrap, catRow, perRow) {
         let blurFunc = function (event) {
             if (submitFunc()) {
                 cleanupFunc();
+                var sel = window.getSelection ? window.getSelection() : document.selection;
+                if (sel) {
+                    if (sel.removeAllRanges) {
+                        sel.removeAllRanges();
+                    } else if (sel.empty) {
+                        sel.empty();
+                    }
+                }
             } else {
                 editElem.focus();
             }
@@ -451,5 +499,6 @@ function createEditListener(gradeColContentWrap, catRow, perRow) {
         editElem.addEventListener("blur", blurFunc);
         editElem.addEventListener("keydown", keyFunc);
         editElem.focus();
+        document.execCommand('selectAll', false, null);
     };
 }

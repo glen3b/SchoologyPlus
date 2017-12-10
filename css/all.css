@@ -25,3 +25,7 @@ body .submit-span-wrapper, body .click-submit, body .submit-btn, body .popups-bo
     background-color: #39cc8f !important;
     border-color: #0fe971 !important;
 }
+
+#nav_left>li {
+    padding-bottom: 3px !important;
+}
