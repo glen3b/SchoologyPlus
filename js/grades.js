@@ -18,6 +18,7 @@ if (document.getElementById("main-inner") && new URLSearchParams(location.search
         coursesArr.sort(function (a, b) {
             // get course IDs
             // 22 = "s-js-gradebook-course-".length
+            // in error case (malformed ID, failure integer parse, etc) indices will eval to -1 which is fine
             let aId = Number.parseInt(a.id.substr(22));
             let bId = Number.parseInt(b.id.substr(22));
             let aInd = orderedClassList.indexOf(aId);
@@ -47,8 +48,10 @@ if (document.getElementById("main-inner") && new URLSearchParams(location.search
         let aTitle = a.firstElementChild.firstElementChild.textContent;
         let bTitle = b.firstElementChild.firstElementChild.textContent;
         let perExtractRegex = /TERM [A-Z]+ - PERIOD (\d+)/;
-        let aPer = Number.parseInt(perExtractRegex.exec(aTitle)[1]);
-        let bPer = Number.parseInt(perExtractRegex.exec(bTitle)[1]);
+        let aRegExec = perExtractRegex.exec(aTitle);
+        let bRegExec = perExtractRegex.exec(bTitle)
+        let aPer = aRegExec ? Number.parseInt(aRegExec[1]) : null;
+        let bPer = bRegExec ? Number.parseInt(bRegExec[1]) : null;
 
         // classes with periods come first
         if (!aPer) {
