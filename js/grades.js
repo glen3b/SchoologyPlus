@@ -200,8 +200,11 @@ for (let course of courses) {
             category.getElementsByClassName("grade-column")[0].classList.add("grade-column-center");
         }
 
-        let gradeText = category.getElementsByClassName("awarded-grade")[0];
+        let gradeText = category.getElementsByClassName("awarded-grade")[0] || category.getElementsByClassName("no-grade")[0];
         setGradeText(gradeText, sum, max, category);
+        gradeText.classList.remove("no-grade");
+        gradeText.classList.add("awarded-grade");
+
         let weightText = category.getElementsByClassName("percentage-contrib")[0];
         if (addMoreClassTotal) {
             if (!weightText) {
