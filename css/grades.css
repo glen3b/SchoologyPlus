@@ -69,6 +69,11 @@ col.comments-column {
     width: 12px;
 }
 
+/* properly collapse elements even when we've styled them in JS at the element level */
+.grade-add-indicator.hidden, .report-row.item-row.hidden {
+    display: none !important;
+}
+
 /* to allow "absolute" position of edit icon" */
 
 .item-row .grade-column .grade-wrapper {
