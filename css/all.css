@@ -61,6 +61,6 @@ body #nav .s-notifications-mini .requester-links a:hover {
 
 /* nasty hack, apparently highly machine-dependent */
 #nav_left > li#primary-home {
-    padding-bottom: 2.6px !important;
-    padding-top: 6.4px !important;
+    padding-bottom: 2.4px !important;
+    padding-top: 6.6px !important;
 }
