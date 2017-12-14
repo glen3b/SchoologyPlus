@@ -60,5 +60,6 @@ body #nav .s-notifications-mini .requester-links a:hover {
 }
 
 #nav_left > li#primary-home {
-    padding-bottom: 3px !important;
+    padding-bottom: 2px !important;
+    height: 37px !important;
 }
