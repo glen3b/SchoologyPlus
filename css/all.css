@@ -59,6 +59,8 @@ body #nav .s-notifications-mini .requester-links a:hover {
     padding-bottom: 2px !important;
 }
 
+/* nasty hack, apparently highly machine-dependent */
 #nav_left > li#primary-home {
-    padding-bottom: 3px !important;
+    padding-bottom: 2.6px !important;
+    padding-top: 6.4px !important;
 }
