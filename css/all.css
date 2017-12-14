@@ -55,6 +55,10 @@ body #nav .s-notifications-mini .requester-links a:hover {
     border-color: #0fe971 !important;
 }
 
-#nav_left > li {
+#nav_left > li.primary-activities {
     padding-bottom: 2px !important;
+}
+
+#nav_left > li#primary-home {
+    padding-bottom: 3px !important;
 }
