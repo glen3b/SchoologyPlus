@@ -525,17 +525,39 @@ function createEditListener(gradeColContentWrap, catRow, perRow, finishedCallbac
                 awardedPeriodPercent.textContent = (Math.round(newPerPercent * 100) / 100) + "%";
             } else {
                 let total = 0;
+                let totalWeights = 0;
                 for (let category of perRow.parentElement.getElementsByClassName("category-row")) {
-                    let weightPercent = category.getElementsByClassName("percentage-contrib")[0].textContent;
+                    let weightPercentElement = category.getElementsByClassName("percentage-contrib")[0];
+                    if (!weightPercentElement) {
+                        continue;
+                    }
+                    let weightPercent = weightPercentElement.textContent;
                     let col = category.getElementsByClassName("grade-column-right")[0];
                     let colMatch = col ? col.textContent.match(/(\d+\.?\d*)%/) : null;
                     if (colMatch) {
                         let scorePercent = Number.parseFloat(colMatch[1]);
-                        total += (weightPercent.slice(1, -2) / 100) * scorePercent;
-                        awardedPeriodPercent.title = total + "%";
-                        awardedPeriodPercent.textContent = (Math.round(total * 100) / 100) + "%";
+                        if (scorePercent && !Number.isNaN(scorePercent)) {
+                            total += (weightPercent.slice(1, -2) / 100) * scorePercent;
+                            totalWeights += Number.parseFloat(weightPercent.slice(1, -2));
+                        }
                     }
                 }
+
+                totalWeights /= 100;
+
+                // if only some categories have assignments, adjust the total accordingly 
+                // if weights are more than 100, this assumes that it's correct as intended (e.c.), I won't mess with it
+                if (totalWeights > 0 && totalWeights < 1) {
+                    // some categories are specified, but weights don't quite add to 100
+                    // scale up known grades
+                    total /= totalWeights;
+                // epsilon because floating point
+                } else if (totalWeights < 0.00001) {
+                    total = 100;
+                }
+
+                awardedPeriodPercent.title = total + "%";
+                awardedPeriodPercent.textContent = (Math.round(total * 100) / 100) + "%";
             }
 
             if (!awardedPeriodPercentContainer.getElementsByClassName("modified-score-percent-warning")[0]) {
